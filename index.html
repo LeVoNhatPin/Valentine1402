@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rùa Valentine · Thiệp Nhạc Tự Động</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 40%, #ffb0c0, #260d1a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Quicksand', 'Segoe UI', cursive, sans-serif;
+            padding: 12px;
+        }
+
+        .game-wrapper {
+            background: rgba(255, 200, 220, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 70px;
+            padding: 22px 22px 32px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 180, 200, 0.5);
+            max-width: 1000px;
+        }
+
+        h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 2.7rem;
+            color: #fff0f5;
+            text-shadow: 0 0 20px #ff99cc, 0 0 40px #ff4d6d;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            border-radius: 60px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 40px #ff99cc;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 8px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 100px;
+            border: 2px solid rgba(255, 200, 220, 0.7);
+            box-shadow: 0 0 30px #ffb6c1;
+        }
+
+        .score-box {
+            background: #1e1428;
+            padding: 8px 36px;
+            border-radius: 60px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ffe6f0;
+            box-shadow: 0 0 20px #ff6f9e;
+            border: 1px solid #ffb0c3;
+        }
+
+        .music-btn {
+            background: #1e1428;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #ffc0d5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 20px #ff6f9e;
+            cursor: pointer;
+            border: 1px solid #ffb0c3;
+        }
+
+        .music-btn:active { transform: scale(0.96); }
+
+        .restart-btn {
+            background: linear-gradient(145deg, #2a1f3a, #1a0f2a);
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 12px 48px;
+            border-radius: 60px;
+            color: #ffd9e6;
+            border: 2px solid #ffb0c3;
+            box-shadow: 0 0 30px #ff6f9e, 0 8px 0 #4a1f3a;
+            cursor: pointer;
+            transition: 0.06s linear;
+            display: block;
+            margin: 10px auto 5px;
+        }
+
+        .restart-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 30px #ff4d6d, 0 2px 0 #4a1f3a;
+        }
+
+        /* Quiz screen - thiệp Valentine */
+        .quiz-screen {
+            background: rgba(30, 10, 20, 0.8);
+            backdrop-filter: blur(25px);
+            border-radius: 80px;
+            padding: 40px 50px;
+            text-align: center;
+            box-shadow: 0 0 80px #ff99cc, inset 0 0 0 4px rgba(255, 200, 220, 0.6);
+            max-width: 800px;
+            margin: 0 auto;
+            border: 3px solid #ffb0c3;
+        }
+
+        .quiz-question {
+            font-size: 2.8rem;
+            color: #fff0f7;
+            margin-bottom: 40px;
+            font-weight: 700;
+            text-shadow: 0 0 20px #ff99cc;
+        }
+
+        .quiz-options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .quiz-option {
+            background: rgba(80, 20, 40, 0.8);
+            border: 3px solid #ff99cc;
+            border-radius: 80px;
+            padding: 18px 45px;
+            font-size: 2.2rem;
+            color: white;
+            text-shadow: 0 0 15px #ffb6c1;
+            cursor: pointer;
+            box-shadow: 0 0 30px #ff4d6d, 0 8px 0 #4a1f3a;
+            transition: 0.05s;
+            backdrop-filter: blur(5px);
+        }
+
+        .quiz-option:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 30px #ff99cc, 0 3px 0 #4a1f3a;
+        }
+
+        .feedback-message {
+            font-size: 2.2rem;
+            color: #ffd9e6;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px 30px;
+            border-radius: 70px;
+            border: 2px solid #ffb0c3;
+        }
+
+        .next-btn {
+            background: #ff4d6d;
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 12px 48px;
+            border-radius: 60px;
+            color: white;
+            border: 2px solid #ffb0c3;
+            box-shadow: 0 0 30px #ff99cc, 0 8px 0 #9e2f50;
+            cursor: pointer;
+            margin: 10px auto 0;
+        }
+
+        .next-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 30px #ff4d6d, 0 2px 0 #9e2f50;
+        }
+
+        /* Thiệp chúc cuối cùng */
+        .valentine-card {
+            background: linear-gradient(145deg, #ffd9e6, #ffb0c3);
+            border-radius: 70px;
+            padding: 30px 40px;
+            color: #a52f54;
+            font-size: 2.3rem;
+            line-height: 1.5;
+            font-weight: 600;
+            box-shadow: 0 0 80px #ff99cc;
+            border: 6px solid white;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .hidden { display: none !important; }
+
+        audio { display: none; }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <h1>
+            <span>🐢</span> RÙA VALENTINE <span>🐢</span>
+        </h1>
+
+        <div id="gameArea">
+            <canvas id="gameCanvas" width="900" height="500"></canvas>
+            <div class="stats">
+                <button class="music-btn" id="musicToggleBtn">🔊 Nhạc</button>
+                <div class="score-box" id="scoreDisplay">0</div>
+            </div>
+            <button class="restart-btn" id="restartGameBtn">💫 CHƠI LẠI</button>
+        </div>
+
+        <div id="quizArea" class="quiz-screen hidden">
+            <div id="quizQuestion" class="quiz-question"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div id="quizFeedback" class="feedback-message hidden"></div>
+            <button id="nextQuestionBtn" class="next-btn hidden">🌹 Tiếp theo</button>
+            <div id="valentineCard" class="valentine-card hidden"></div>
+        </div>
+    </div>
+
+    <!-- Audio: Mặt trời của em (thay link thật nếu có) -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        (function() {
+            // === Cấu hình canvas ===
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreSpan = document.getElementById('scoreDisplay');
+            const restartBtn = document.getElementById('restartGameBtn');
+            const gameArea = document.getElementById('gameArea');
+            const quizArea = document.getElementById('quizArea');
+            const quizQuestion = document.getElementById('quizQuestion');
+            const quizOptions = document.getElementById('quizOptions');
+            const quizFeedback = document.getElementById('quizFeedback');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            const valentineCard = document.getElementById('valentineCard');
+            const bgMusic = document.getElementById('bgMusic');
+            const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+            const W = 900, H = 500;
+            const GROUND_Y = 430;
+            const PLAYER_WIDTH = 65;
+            const PLAYER_HEIGHT = 55;
+            const PLAYER_X = 160;
+
+            // Trạng thái game
+            let gameActive = true;
+            let score = 0;
+            let player = {
+                x: PLAYER_X,
+                y: GROUND_Y - PLAYER_HEIGHT,
+                vy: 0,
+                grounded: true,
+                scale: 1.0       // hiệu ứng nhảy
+            };
+            const GRAVITY = 0.4;
+            const JUMP_POWER = -9.0;
+
+            // Obstacles
+            let obstacles = [];
+            const OBSTACLE_SPEED = 5.2;
+            const MIN_OBS_DIST = 300;
+            const SPAWN_RATE = 40;
+            let frameCounter = 0;
+
+            // Nhảy
+            let jumpPressed = false;
+            let canJump = true;
+
+            // Nhạc
+            let musicPlaying = false;
+            musicToggleBtn.addEventListener('click', () => {
+                if (musicPlaying) {
+                    bgMusic.pause();
+                    musicToggleBtn.innerHTML = '🔇 Nhạc';
+                } else {
+                    bgMusic.play().catch(e => console.log('Autoplay bị chặn'));
+                    musicToggleBtn.innerHTML = '🔊 Nhạc';
+                }
+                musicPlaying = !musicPlaying;
+            });
+
+            // Hiệu ứng phụ
+            let particles = [];
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = (Math.random() - 0.5) * 3;
+                    this.vy = Math.random() * -2 - 1;
+                    this.size = Math.random() * 6 + 3;
+                    this.alpha = 0.8;
+                    this.color = '#ffb6c1';
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += 0.1;
+                    this.alpha -= 0.01;
+                    this.size *= 0.97;
+                }
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            function addJumpParticles(x, y) {
+                for (let i = 0; i < 8; i++) {
+                    particles.push(new Particle(x + Math.random()*30 -15, y+20));
+                }
+            }
+
+            // === Vẽ nền không gian lãng mạn ===
+            function drawBackground() {
+                // gradient vũ trụ
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#2b1a2a');
+                grad.addColorStop(0.7, '#4a2a4a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                // sao
+                for (let i = 0; i < 120; i++) {
+                    let x = (i * 31) % W, y = (i * 17) % H;
+                    ctx.fillStyle = `rgba(255, 240, 200, ${0.3 + 0.2 * Math.sin(Date.now()/700 + i)})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1 + (i % 3), 0, 2*Math.PI);
+                    ctx.fill();
+                }
+
+                // mặt trăng lớn
+                ctx.shadowColor = '#ffb6c1';
+                ctx.shadowBlur = 60;
+                ctx.fillStyle = '#f0e0d0';
+                ctx.beginPath();
+                ctx.arc(700, 80, 50, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // mặt đất (hành tinh)
+                ctx.fillStyle = '#5a4a6a';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.arc(200, GROUND_Y+50, 350, 0, Math.PI, true);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#6b5a7a';
+                ctx.fillRect(0, GROUND_Y-5, W, H-GROUND_Y+5);
+            }
+
+            // === Vẽ rùa siêu chi tiết, mai hình bán nguyệt ===
+            function drawTurtle(x, y, jumpScale = 1.0) {
+                ctx.save();
+                ctx.shadowColor = '#c0a0e0';
+                ctx.shadowBlur = 25;
+
+                // hiệu ứng khi nhảy: hơi phồng lên
+                let scaleX = 1.0;
+                let scaleY = jumpScale;
+
+                // mai chính (bán cầu)
+                ctx.fillStyle = '#7caf5e';
+                ctx.beginPath();
+                ctx.ellipse(x + PLAYER_WIDTH/2, y + PLAYER_HEIGHT/2 - 4, PLAYER_WIDTH/2.3 * scaleX, PLAYER_HEIGHT/2.5 * scaleY, 0, 0, Math.PI*2);
+                ctx.fill();
+
+                // vân mai (hình bán nguyệt đồng tâm)
+                ctx.strokeStyle = '#4f7a2f';
+                ctx.lineWidth = 2;
+                for (let i = 1; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.ellipse(x + PLAYER_WIDTH/2, y + PLAYER_HEIGHT/2 - 4, PLAYER_WIDTH/2.3 - i*6, PLAYER_HEIGHT/2.5 - i*4, 0, 0, 2*Math.PI);
+                    ctx.stroke();
+                }
+
+                // đầu
+                ctx.fillStyle = '#9acd66';
+                ctx.beginPath();
+                ctx.ellipse(x + PLAYER_WIDTH - 12, y + PLAYER_HEIGHT/2 - 12, 14, 12, 0, 0, 2*Math.PI);
+                ctx.fill();
+
+                // mắt
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x + PLAYER_WIDTH - 4, y + PLAYER_HEIGHT/2 - 20, 5, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.fillStyle = '#2b1a1a';
+                ctx.beginPath();
+                ctx.arc(x + PLAYER_WIDTH - 2, y + PLAYER_HEIGHT/2 - 22, 2.5, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x + PLAYER_WIDTH - 6, y + PLAYER_HEIGHT/2 - 24, 1, 0, 2*Math.PI);
+                ctx.fill();
+
+                // mỏ nhỏ
+                ctx.fillStyle = '#d4a373';
+                ctx.beginPath();
+                ctx.arc(x + PLAYER_WIDTH - 1, y + PLAYER_HEIGHT/2 - 16, 2, 0, 2*Math.PI);
+                ctx.fill();
+
+                // chân
+                ctx.fillStyle = '#6b8e4c';
+                ctx.beginPath();
+                ctx.ellipse(x + 12, y + PLAYER_HEIGHT - 6, 10, 6, 0, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + PLAYER_WIDTH - 24, y + PLAYER_HEIGHT - 6, 10, 6, 0, 0, 2*Math.PI);
+                ctx.fill();
+
+                // đuôi
+                ctx.fillStyle = '#557a3a';
+                ctx.beginPath();
+                ctx.moveTo(x + 4, y + PLAYER_HEIGHT/2 + 6);
+                ctx.lineTo(x - 8, y + PLAYER_HEIGHT/2);
+                ctx.lineTo(x - 8, y + PLAYER_HEIGHT/2 + 12);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // Vẽ chướng ngại vật (thiên thạch, băng, v.v.)
+            function drawObstacle(obs) {
+                ctx.save();
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ff99cc';
+                if (obs.type === 0) { // thiên thạch
+                    ctx.fillStyle = '#8a5a5a';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#5a3a3a';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + 15, obs.y + 10, 8, 0, 2*Math.PI);
+                    ctx.fill();
+                } else if (obs.type === 1) { // băng
+                    ctx.fillStyle = '#b0e0ff';
+                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                } else if (obs.type === 2) { // ufo
+                    ctx.fillStyle = '#c0a0a0';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#f0e68c';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + obs.width/2 - 5, obs.y + obs.height/2 - 8, 8, 0, 2*Math.PI);
+                    ctx.fill();
+                } else { // lỗ đen
+                    ctx.fillStyle = '#2a1f2a';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            function spawnObstacle() {
+                if (!gameActive) return;
+                const type = Math.floor(Math.random() * 4);
+                let w = 60 + Math.random()*20, h = 30 + Math.random()*20;
+                obstacles.push({
+                    x: W,
+                    y: GROUND_Y - h - 5,
+                    width: w, height: h,
+                    type,
+                    passed: false
+                });
+            }
+
+            function rectCollide(x1, y1, w1, h1, x2, y2, w2, h2) {
+                return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+            }
+
+            function updateGame() {
+                if (!gameActive) return;
+
+                // trọng lực
+                player.vy += GRAVITY;
+                player.y += player.vy;
+
+                if (player.y >= GROUND_Y - PLAYER_HEIGHT) {
+                    player.y = GROUND_Y - PLAYER_HEIGHT;
+                    player.vy = 0;
+                    player.grounded = true;
+                    player.scale = 1.0;
+                } else {
+                    player.grounded = false;
+                    // hiệu ứng nhảy: hơi dẹt khi lên, dãn khi xuống
+                    if (player.vy < 0) player.scale = 1.1; // lên cao
+                    else player.scale = 0.95; // rơi xuống
+                }
+
+                if (jumpPressed && player.grounded && canJump) {
+                    player.vy = JUMP_POWER;
+                    player.grounded = false;
+                    canJump = false;
+                    addJumpParticles(player.x + PLAYER_WIDTH/2, player.y + PLAYER_HEIGHT-10);
+                }
+                if (!jumpPressed) canJump = true;
+
+                // obstacles
+                for (let i = obstacles.length-1; i>=0; i--) {
+                    let o = obstacles[i];
+                    o.x -= OBSTACLE_SPEED;
+
+                    if (!o.passed && o.x + o.width < PLAYER_X) {
+                        o.passed = true;
+                        score++;
+                        scoreSpan.innerText = score;
+                        if (score >= 27) {
+                            gameActive = false;
+                            startQuiz();
+                            return;
+                        }
+                    }
+
+                    if (o.x + o.width < 0) obstacles.splice(i,1);
+                }
+
+                for (let o of obstacles) {
+                    if (rectCollide(player.x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT, o.x, o.y, o.width, o.height)) {
+                        gameActive = false;
+                        alert('💥 Rùa gặp nạn! Thử lại nhé.');
+                        resetGame();
+                        return;
+                    }
+                }
+
+                frameCounter++;
+                if (frameCounter % SPAWN_RATE === 0 && (obstacles.length === 0 || obstacles[obstacles.length-1].x < W - MIN_OBS_DIST)) {
+                    spawnObstacle();
+                }
+
+                // update particles
+                for (let i=particles.length-1; i>=0; i--) {
+                    particles[i].update();
+                    if (particles[i].alpha <= 0) particles.splice(i,1);
+                }
+            }
+
+            function draw() {
+                drawBackground();
+                obstacles.forEach(o => drawObstacle(o));
+                drawTurtle(player.x, player.y, player.scale);
+                particles.forEach(p => p.draw());
+                ctx.font = 'bold 28px "Quicksand"';
+                ctx.fillStyle = '#ffe6f0';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ff99cc';
+                ctx.fillText(`✨ ${score}/27`, 680, 70);
+                ctx.shadowBlur = 0;
+            }
+
+            function gameLoop() {
+                if (gameActive) updateGame();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+
+            function resetGame() {
+                gameActive = true;
+                score = 0;
+                scoreSpan.innerText = '0';
+                player.y = GROUND_Y - PLAYER_HEIGHT;
+                player.vy = 0;
+                obstacles = [];
+                frameCounter = 0;
+                particles = [];
+                gameArea.classList.remove('hidden');
+                quizArea.classList.add('hidden');
+                bgMusic.pause();
+                musicPlaying = false;
+                musicToggleBtn.innerHTML = '🔊 Nhạc';
+            }
+
+            // === PHẦN QUIZ ===
+            function startQuiz() {
+                gameArea.classList.add('hidden');
+                quizArea.classList.remove('hidden');
+                currentQuestion = 0;
+                showQuestion(0);
+                nextBtn.classList.add('hidden');
+                quizFeedback.classList.add('hidden');
+                valentineCard.classList.add('hidden');
+            }
+
+            const questions = [
+                {
+                    q: "anh pin thích?",
+                    options: [
+                        { text: "apin thích em", feedback: "tuyệt vời lắm bảo bối à, em là số 1 của lòng anh" },
+                        { text: "apin thích lego", feedback: "apin thích lego nhưng cục cưng của a là em đó bảo bối nhỏ" }
+                    ]
+                },
+                {
+                    q: "apin vễ xương hong?",
+                    options: [
+                        { text: "vễ xưn", feedback: "e tuyệt vời lắm, a biết a e xun như e mò" },
+                        { text: "siu vễ xưn", feedback: "đúng vậy, 2 chúng ta là 1, siu cấp vễ xun" }
+                    ]
+                },
+                {
+                    q: "apin yêu e nhỏ nhiều hăm?",
+                    options: [
+                        { text: "hăm", feedback: "LỖI! Không được chọn 'hăm', hãy chọn 'siu siu siu nhiều'", error: true },
+                        { text: "siu siu siu nhiều", feedback: "" }
+                    ]
+                }
+            ];
+
+            let currentQuestion = 0;
+
+            function showQuestion(index) {
+                if (index >= questions.length) {
+                    // Hiện thiệp chúc và tự động bật nhạc
+                    quizQuestion.classList.add('hidden');
+                    quizOptions.classList.add('hidden');
+                    quizFeedback.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    valentineCard.classList.remove('hidden');
+                    valentineCard.innerHTML = `e nhỏ vễ xun, valentine này a ở xa mất rùi nên không cho e nhỏ nhiều được, nma a vẫn yêu em nhiều, chúc e nhỏ của apin ngày càng vễ xun, yêu em, anh yêu em nhiều ~~~ Moaaaaaaaaa~~~ Loveee 💖`;
+
+                    // Tự động bật nhạc "Mặt trời của em" và lặp lại
+                    bgMusic.play().then(() => {
+                        bgMusic.loop = true;
+                        musicPlaying = true;
+                        musicToggleBtn.innerHTML = '🔊 Nhạc';
+                    }).catch(e => console.log('Chưa thể phát nhạc tự động, cần tương tác'));
+                    return;
+                }
+
+                const q = questions[index];
+                quizQuestion.innerText = q.q;
+                quizQuestion.classList.remove('hidden');
+                quizOptions.classList.remove('hidden');
+                quizFeedback.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                valentineCard.classList.add('hidden');
+
+                quizOptions.innerHTML = '';
+                q.options.forEach((opt, i) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'quiz-option';
+                    btn.innerText = opt.text;
+                    btn.addEventListener('click', () => handleAnswer(index, i));
+                    quizOptions.appendChild(btn);
+                });
+            }
+
+            function handleAnswer(qIndex, optIndex) {
+                const q = questions[qIndex];
+                const opt = q.options[optIndex];
+
+                quizFeedback.innerText = opt.feedback || '❤️ Yêu thương...';
+                quizFeedback.classList.remove('hidden');
+
+                if (qIndex === 2 && optIndex === 0) {
+                    nextBtn.classList.add('hidden'); // lỗi không cho next
+                    return;
+                }
+
+                nextBtn.classList.remove('hidden');
+            }
+
+            nextBtn.addEventListener('click', () => {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            });
+
+            // Điều khiển
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') { e.preventDefault(); jumpPressed = true; }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.code === 'Space') { e.preventDefault(); jumpPressed = false; }
+            });
+            canvas.addEventListener('click', () => {
+                jumpPressed = true;
+                setTimeout(() => jumpPressed = false, 100);
+            });
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jumpPressed = true;
+                setTimeout(() => jumpPressed = false, 100);
+            });
+
+            restartBtn.addEventListener('click', resetGame);
+
+            resetGame();
+            gameLoop();
+        })();
+    </script>
+</body>
+</html>
