@@ -586,7 +586,7 @@
                         o.passed = true;
                         score++;
                         scoreSpan.innerText = score;
-                        if (score >= 27) {
+                        if (score >= 9) {
                             gameActive = false;
                             startQuiz();
                             return;
@@ -630,7 +630,7 @@
                 ctx.fillStyle = '#ffe6f0';
                 ctx.shadowBlur = 30;
                 ctx.shadowColor = '#ff99cc';
-                ctx.fillText(`✨ ${score}/27`, 680, 70);
+                ctx.fillText(`✨ ${score}/9`, 680, 70);
                 ctx.shadowBlur = 0;
             }
 
