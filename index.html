@@ -182,7 +182,7 @@ function drawWheel(angle){
 /* ===== 95% LOGIC ===== */
 function getResultIndex(){
     let r = Math.random();
-    if(r <= 0.85){
+    if(r <= 0.75){
         return LUCKY[Math.floor(Math.random()*LUCKY.length)];
     }else{
         return MONEY[Math.floor(Math.random()*MONEY.length)];
