@@ -1,787 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rùa Valentine · Space Edition</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vòng Quay May Mắn</title>
 
-        body {
-            min-height: 100vh;
-            background: radial-gradient(ellipse at 30% 40%, #4a1f3a, #0a0a1a);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Poppins', 'Segoe UI', cursive, sans-serif;
-            padding: 12px;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        .game-wrapper {
-            background: rgba(10, 5, 20, 0.6);
-            backdrop-filter: blur(16px);
-            border-radius: 80px;
-            padding: 22px 22px 32px;
-            box-shadow: 0 40px 70px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(255, 180, 200, 0.5);
-            border: 1px solid rgba(255, 200, 230, 0.4);
-            max-width: 1000px;
-            position: relative;
-        }
+body{
+    font-family:sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    background:linear-gradient(180deg,#ff8c42,#d84315);
+    overflow-x:hidden;
+}
 
-        h1 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 2.8rem;
-            color: #fff0fa;
-            text-shadow: 0 0 25px #ff99cc, 0 0 50px #ff4d6d;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-        }
+/* ===== TITLE ===== */
+.title{
+    margin-top:20px;
+    font-size:clamp(22px,6vw,42px);
+    color:white;
+    font-weight:bold;
+    text-align:center;
+    text-shadow:0 0 10px gold;
+}
 
-        canvas {
-            display: block;
-            width: 100%;
-            max-width: 900px;
-            height: auto;
-            border-radius: 60px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 60px #ff99cc;
-            background: transparent;
-            cursor: pointer;
-        }
+/* ===== WHEEL CONTAINER ===== */
+.wheel-container{
+    position:relative;
+    width:min(90vw,520px);
+    aspect-ratio:1/1;
+    margin-top:20px;
+}
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 16px 8px 12px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-            padding: 12px 24px;
-            border-radius: 100px;
-            border: 2px solid rgba(255, 200, 230, 0.8);
-            box-shadow: 0 0 40px #ffb6c1;
-        }
+/* ===== CANVAS ===== */
+canvas{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    box-shadow:0 0 40px gold;
+    background:white;
+}
 
-        .score-box {
-            background: #1e0f2a;
-            padding: 8px 36px;
-            border-radius: 60px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #ffe6f0;
-            box-shadow: 0 0 25px #ff6f9e;
-            border: 1px solid #ffb0c3;
-        }
+/* ===== POINTER ===== */
+.pointer{
+    position:absolute;
+    top:-28px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:22px solid transparent;
+    border-right:22px solid transparent;
+    border-bottom:38px solid #ffd700;
+    filter:drop-shadow(0 0 8px gold);
+    z-index:10;
+}
 
-        .music-btn {
-            background: #1e0f2a;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 50px;
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #ffc0d5;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 25px #ff6f9e;
-            cursor: pointer;
-            border: 1px solid #ffb0c3;
-            transition: 0.1s;
-        }
-        .music-btn:active { transform: scale(0.96); }
+/* ===== BUTTON ===== */
+button{
+    margin-top:25px;
+    padding:14px 40px;
+    font-size:clamp(16px,4vw,22px);
+    border:none;
+    border-radius:40px;
+    cursor:pointer;
+    background:linear-gradient(45deg,#ffd700,#ff9800);
+    font-weight:bold;
+    box-shadow:0 6px 0 #cc7a00;
+}
 
-        .restart-btn {
-            background: linear-gradient(145deg, #3a1f4a, #1a0f2a);
-            border: none;
-            font-size: 2rem;
-            font-weight: bold;
-            padding: 12px 48px;
-            border-radius: 60px;
-            color: #ffd9e6;
-            border: 2px solid #ffb0c3;
-            box-shadow: 0 0 40px #ff6f9e, 0 8px 0 #3a1f3a;
-            cursor: pointer;
-            transition: 0.06s linear;
-            display: block;
-            margin: 10px auto 5px;
-        }
-        .restart-btn:active {
-            transform: translateY(8px);
-            box-shadow: 0 0 40px #ff4d6d, 0 2px 0 #3a1f3a;
-        }
+button:active{
+    transform:translateY(6px);
+    box-shadow:0 2px 0 #cc7a00;
+}
 
-        /* Màn hình Start Game */
-        .start-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1a0f2a, #050510);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-        .start-card {
-            background: rgba(30, 10, 30, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 100px;
-            padding: 50px 80px;
-            text-align: center;
-            border: 4px solid #ffb0c3;
-            box-shadow: 0 0 100px #ff99cc;
-        }
-        .start-card h2 {
-            font-size: 4rem;
-            color: #ffe6f0;
-            margin-bottom: 40px;
-            text-shadow: 0 0 30px #ff99cc;
-        }
-        .start-btn {
-            background: #ff4d6d;
-            border: none;
-            font-size: 3rem;
-            font-weight: bold;
-            padding: 20px 70px;
-            border-radius: 90px;
-            color: white;
-            border: 4px solid white;
-            box-shadow: 0 0 60px #ff99cc, 0 12px 0 #9e2f50;
-            cursor: pointer;
-            transition: 0.08s;
-        }
-        .start-btn:active {
-            transform: translateY(12px);
-            box-shadow: 0 0 60px #ff4d6d, 0 4px 0 #9e2f50;
-        }
-
-        /* Quiz screen */
-        .quiz-screen {
-            background: rgba(20, 5, 20, 0.9);
-            backdrop-filter: blur(25px);
-            border-radius: 80px;
-            padding: 40px 50px;
-            text-align: center;
-            box-shadow: 0 0 90px #ff99cc, inset 0 0 0 4px rgba(255, 200, 220, 0.6);
-            max-width: 800px;
-            margin: 0 auto;
-            border: 3px solid #ffb0c3;
-        }
-        .quiz-question {
-            font-size: 2.8rem;
-            color: #fff0f7;
-            margin-bottom: 40px;
-            font-weight: 700;
-            text-shadow: 0 0 25px #ff99cc;
-        }
-        .quiz-options {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-        }
-        .quiz-option {
-            background: rgba(80, 20, 40, 0.9);
-            border: 3px solid #ff99cc;
-            border-radius: 80px;
-            padding: 18px 45px;
-            font-size: 2.2rem;
-            color: white;
-            text-shadow: 0 0 15px #ffb6c1;
-            cursor: pointer;
-            box-shadow: 0 0 30px #ff4d6d, 0 8px 0 #4a1f3a;
-            transition: 0.05s;
-        }
-        .quiz-option:active {
-            transform: translateY(8px);
-            box-shadow: 0 0 30px #ff99cc, 0 3px 0 #4a1f3a;
-        }
-        .feedback-message {
-            font-size: 2.2rem;
-            color: #ffd9e6;
-            margin: 20px 0;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 16px 30px;
-            border-radius: 70px;
-            border: 2px solid #ffb0c3;
-        }
-        .next-btn {
-            background: #ff4d6d;
-            border: none;
-            font-size: 2rem;
-            font-weight: bold;
-            padding: 12px 48px;
-            border-radius: 60px;
-            color: white;
-            border: 2px solid #ffb0c3;
-            box-shadow: 0 0 30px #ff99cc, 0 8px 0 #9e2f50;
-            cursor: pointer;
-            margin: 10px auto 0;
-        }
-        .next-btn:active {
-            transform: translateY(8px);
-            box-shadow: 0 0 30px #ff4d6d, 0 2px 0 #9e2f50;
-        }
-        .valentine-card {
-            background: linear-gradient(145deg, #ffc0d5, #ff99cc);
-            border-radius: 70px;
-            padding: 30px 40px;
-            color: #4a1f3a;
-            font-size: 2.3rem;
-            line-height: 1.5;
-            font-weight: 600;
-            box-shadow: 0 0 90px #ff99cc;
-            border: 6px solid white;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .hidden { display: none !important; }
-
-        audio { display: none; }
-    </style>
+/* ===== RESULT ===== */
+.result{
+    margin-top:20px;
+    font-size:clamp(18px,5vw,26px);
+    color:white;
+    font-weight:bold;
+    text-align:center;
+    text-shadow:0 0 10px black;
+}
+</style>
 </head>
 <body>
-    <!-- Màn hình Start -->
-    <div id="startOverlay" class="start-overlay">
-        <div class="start-card">
-            <h2>🐢 RÙA VŨ TRỤ 🐢</h2>
-            <button class="start-btn" id="startGameBtn">BẮT ĐẦU</button>
-        </div>
-    </div>
 
-    <div class="game-wrapper">
-        <h1>
-            <span>✨</span> VALENTINE SPACE <span>✨</span>
-        </h1>
+<div class="title">🧧 VÒNG QUAY MAY MẮN 🧧</div>
 
-        <div id="gameArea">
-            <canvas id="gameCanvas" width="900" height="500"></canvas>
-            <div class="stats">
-                <button class="music-btn" id="musicToggleBtn">🔊 Nhạc</button>
-                <div class="score-box" id="scoreDisplay">0</div>
-            </div>
-            <button class="restart-btn" id="restartGameBtn">💫 CHƠI LẠI</button>
-        </div>
+<div class="wheel-container">
+    <div class="pointer"></div>
+    <canvas id="wheel"></canvas>
+</div>
 
-        <div id="quizArea" class="quiz-screen hidden">
-            <div id="quizQuestion" class="quiz-question"></div>
-            <div class="quiz-options" id="quizOptions"></div>
-            <div id="quizFeedback" class="feedback-message hidden"></div>
-            <button id="nextQuestionBtn" class="next-btn hidden">🌹 TIẾP THEO</button>
-            <div id="valentineCard" class="valentine-card hidden"></div>
-        </div>
-    </div>
+<button id="spinBtn">QUAY NGAY</button>
+<div class="result" id="result"></div>
 
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" type="audio/mpeg">
-        <!-- Thay bằng link bài "Mặt trời của em" nếu có -->
-    </audio>
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const resultText = document.getElementById("result");
 
-    <script>
-        (function() {
-            // ========== CẤU HÌNH ==========
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const scoreSpan = document.getElementById('scoreDisplay');
-            const restartBtn = document.getElementById('restartGameBtn');
-            const gameArea = document.getElementById('gameArea');
-            const quizArea = document.getElementById('quizArea');
-            const quizQuestion = document.getElementById('quizQuestion');
-            const quizOptions = document.getElementById('quizOptions');
-            const quizFeedback = document.getElementById('quizFeedback');
-            const nextBtn = document.getElementById('nextQuestionBtn');
-            const valentineCard = document.getElementById('valentineCard');
-            const bgMusic = document.getElementById('bgMusic');
-            const musicToggleBtn = document.getElementById('musicToggleBtn');
+/* ===== RESPONSIVE CANVAS DPI FIX ===== */
+function resizeCanvas(){
+    const size = canvas.clientWidth;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawWheel(currentAngle);
+}
+window.addEventListener("resize", resizeCanvas);
 
-            // Màn hình start
-            const startOverlay = document.getElementById('startOverlay');
-            const startBtn = document.getElementById('startGameBtn');
+/* ===== DATA ===== */
+const segments = [
+    "May mắn lần sau","2k",
+    "May mắn lần sau","5k",
+    "May mắn lần sau","10k",
+    "May mắn lần sau","15k",
+    "May mắn lần sau","20k",
+    "2k","5k","10k","15k","20k"
+];
 
-            // Kích thước
-            const W = 900, H = 500;
-            const GROUND_Y = 430;
-            const PLAYER_WIDTH = 65;
-            const PLAYER_HEIGHT = 55;
-            const PLAYER_X = 160;
+const LUCKY = [0,2,4,6,8];
+const MONEY = [1,3,5,7,9,10,11,12,13,14];
 
-            // Game state
-            let gameActive = false;       // ban đầu chưa chạy
-            let score = 0;
-            let player = {
-                x: PLAYER_X,
-                y: GROUND_Y - PLAYER_HEIGHT,
-                vy: 0,
-                grounded: true,
-                scale: 1.0
-            };
-            const GRAVITY = 0.38;         // giảm nhẹ để dễ nhảy
-            const JUMP_POWER = -8.8;       // nhảy thấp hơn một chút cho dễ
+let total = segments.length;
+let arc = 2*Math.PI/total;
 
-            // Obstacles
-            let obstacles = [];
-            const OBSTACLE_SPEED = 4.8;    // chậm hơn một chút
-            const MIN_OBS_DIST = 320;
-            const SPAWN_RATE = 45;          // spawn thưa hơn
-            let frameCounter = 0;
+let currentAngle = 0;
+let spinning = false;
 
-            // Jump control
-            let jumpPressed = false;
-            let canJump = true;
+/* ===== DRAW WHEEL ===== */
+function drawWheel(angle){
+    const size = canvas.clientWidth;
+    const center = size/2;
+    const radius = center;
 
-            // Nhạc
-            let musicPlaying = false;
-            musicToggleBtn.addEventListener('click', () => {
-                if (musicPlaying) {
-                    bgMusic.pause();
-                    musicToggleBtn.innerHTML = '🔇 Nhạc';
-                } else {
-                    bgMusic.play().catch(e => {});
-                    musicToggleBtn.innerHTML = '🔊 Nhạc';
-                }
-                musicPlaying = !musicPlaying;
-            });
+    ctx.clearRect(0,0,size,size);
 
-            // Hiệu ứng hạt khi nhảy
-            let particles = [];
-            class Particle {
-                constructor(x, y) {
-                    this.x = x; this.y = y;
-                    this.vx = (Math.random() - 0.5) * 2.5;
-                    this.vy = Math.random() * -1.5 - 0.5;
-                    this.size = Math.random() * 5 + 2;
-                    this.alpha = 0.7;
-                    this.color = '#ffb6c1';
-                }
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.vy += 0.08;
-                    this.alpha -= 0.01;
-                    this.size *= 0.98;
-                }
-                draw() {
-                    ctx.globalAlpha = this.alpha;
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
-                    ctx.fill();
-                    ctx.globalAlpha = 1;
-                }
+    for(let i=0;i<total;i++){
+        const start = angle + i*arc;
+
+        ctx.beginPath();
+        ctx.moveTo(center,center);
+        ctx.arc(center,center,radius,start,start+arc);
+        ctx.fillStyle = i%2===0 ? "#e53935" : "#fdd835";
+        ctx.fill();
+
+        ctx.strokeStyle="#fff";
+        ctx.lineWidth=2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(center,center);
+        ctx.rotate(start+arc/2);
+        ctx.textAlign="right";
+        ctx.fillStyle="#000";
+        ctx.font="bold "+(size*0.04)+"px sans-serif";
+        ctx.fillText(segments[i],radius-10,5);
+        ctx.restore();
+    }
+
+    ctx.beginPath();
+    ctx.arc(center,center,radius*0.08,0,2*Math.PI);
+    ctx.fillStyle="gold";
+    ctx.fill();
+}
+
+/* ===== 95% LOGIC ===== */
+function getResultIndex(){
+    let r = Math.random();
+    if(r <= 0.95){
+        return LUCKY[Math.floor(Math.random()*LUCKY.length)];
+    }else{
+        return MONEY[Math.floor(Math.random()*MONEY.length)];
+    }
+}
+
+/* ===== SPIN ===== */
+spinBtn.addEventListener("click",()=>{
+    if(spinning) return;
+    spinning=true;
+    resultText.innerText="";
+
+    const index = getResultIndex();
+    const spins = 8;
+    const baseRotation = spins*2*Math.PI;
+
+    const target =
+        baseRotation +
+        (-Math.PI/2 - (index*arc + arc/2));
+
+    const startAngle = currentAngle;
+    const endAngle = target;
+
+    let startTime=null;
+    const duration=4500;
+
+    function animate(time){
+        if(!startTime) startTime=time;
+        let progress=(time-startTime)/duration;
+        if(progress>1) progress=1;
+
+        let ease=1-Math.pow(1-progress,3);
+        currentAngle = startAngle + (endAngle-startAngle)*ease;
+
+        drawWheel(currentAngle);
+
+        if(progress<1){
+            requestAnimationFrame(animate);
+        }else{
+            spinning=false;
+
+            if(segments[index]==="May mắn lần sau"){
+                resultText.innerText="🍀 Chúc bạn may mắn lần sau!";
+            }else{
+                resultText.innerText="🎉 Bạn nhận được: "+segments[index];
             }
-            function addJumpParticles(x, y) {
-                for (let i=0; i<8; i++) particles.push(new Particle(x + Math.random()*30-15, y+15));
-            }
+        }
+    }
 
-            // ========== VẼ NỀN SPACE RÕ NÉT ==========
-            function drawBackground() {
-                // Deep space gradient
-                const grad = ctx.createLinearGradient(0, 0, 0, H);
-                grad.addColorStop(0, '#0a0a1a');
-                grad.addColorStop(0.8, '#2a1a2a');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
+    requestAnimationFrame(animate);
+});
 
-                // Sao lớn lấp lánh
-                for (let i=0; i<200; i++) {
-                    let x = (i*37) % W, y = (i*23) % H;
-                    let brightness = 0.3 + 0.3 * Math.sin(Date.now()/600 + i);
-                    ctx.fillStyle = `rgba(255, 240, 200, ${brightness})`;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 1.2 + (i%3), 0, 2*Math.PI);
-                    ctx.fill();
-                }
+/* INIT */
+resizeCanvas();
+</script>
 
-                // Tinh vân mờ
-                ctx.globalAlpha = 0.15;
-                ctx.fillStyle = '#b06f9f';
-                ctx.beginPath();
-                ctx.arc(200, 150, 200, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#6fa0b0';
-                ctx.beginPath();
-                ctx.arc(700, 300, 180, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-
-                // Hành tinh lớn
-                ctx.shadowColor = '#ffb6c1';
-                ctx.shadowBlur = 50;
-                ctx.fillStyle = '#8a6f8a';
-                ctx.beginPath();
-                ctx.arc(200, GROUND_Y+50, 320, 0, Math.PI, true);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                // Mặt đất
-                ctx.fillStyle = '#5a4a6a';
-                ctx.fillRect(0, GROUND_Y-6, W, H-GROUND_Y+6);
-                ctx.fillStyle = '#7a6a8a';
-                ctx.fillRect(0, GROUND_Y-3, W, 3);
-            }
-
-            // ========== VẼ RÙA SIÊU ĐẸP ==========
-            function drawTurtle(x, y, scaleY = 1.0) {
-                ctx.save();
-                ctx.shadowColor = '#c0a0e0';
-                ctx.shadowBlur = 30;
-
-                // Mai chính - hình bán cầu
-                ctx.fillStyle = '#7caf5e';
-                ctx.beginPath();
-                ctx.ellipse(x + PLAYER_WIDTH/2, y + PLAYER_HEIGHT/2 - 4, PLAYER_WIDTH/2.2, (PLAYER_HEIGHT/2.5) * scaleY, 0, 0, 2*Math.PI);
-                ctx.fill();
-
-                // Vân mai (các đường tròn đồng tâm)
-                ctx.strokeStyle = '#4f7a2f';
-                ctx.lineWidth = 2.5;
-                for (let i=1; i<=3; i++) {
-                    ctx.beginPath();
-                    ctx.ellipse(x + PLAYER_WIDTH/2, y + PLAYER_HEIGHT/2 - 4, PLAYER_WIDTH/2.2 - i*6, (PLAYER_HEIGHT/2.5)*scaleY - i*4, 0, 0, 2*Math.PI);
-                    ctx.stroke();
-                }
-
-                // Đầu
-                ctx.fillStyle = '#9acd66';
-                ctx.beginPath();
-                ctx.ellipse(x + PLAYER_WIDTH - 12, y + PLAYER_HEIGHT/2 - 12, 14, 12, 0, 0, 2*Math.PI);
-                ctx.fill();
-
-                // Mắt
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(x + PLAYER_WIDTH - 4, y + PLAYER_HEIGHT/2 - 20, 5, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#2b1a1a';
-                ctx.beginPath();
-                ctx.arc(x + PLAYER_WIDTH - 2, y + PLAYER_HEIGHT/2 - 22, 2.5, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(x + PLAYER_WIDTH - 6, y + PLAYER_HEIGHT/2 - 24, 1, 0, 2*Math.PI);
-                ctx.fill();
-
-                // Mỏ
-                ctx.fillStyle = '#d4a373';
-                ctx.beginPath();
-                ctx.arc(x + PLAYER_WIDTH - 1, y + PLAYER_HEIGHT/2 - 16, 2, 0, 2*Math.PI);
-                ctx.fill();
-
-                // Chân
-                ctx.fillStyle = '#6b8e4c';
-                ctx.beginPath();
-                ctx.ellipse(x + 12, y + PLAYER_HEIGHT - 6, 10, 6, 0, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(x + PLAYER_WIDTH - 24, y + PLAYER_HEIGHT - 6, 10, 6, 0, 0, 2*Math.PI);
-                ctx.fill();
-
-                // Đuôi
-                ctx.fillStyle = '#557a3a';
-                ctx.beginPath();
-                ctx.moveTo(x + 4, y + PLAYER_HEIGHT/2 + 6);
-                ctx.lineTo(x - 8, y + PLAYER_HEIGHT/2);
-                ctx.lineTo(x - 8, y + PLAYER_HEIGHT/2 + 12);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.restore();
-            }
-
-            // ========== VẼ VẬT CẢN (dễ nhìn) ==========
-            function drawObstacle(obs) {
-                ctx.save();
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = '#ff99cc';
-                if (obs.type === 0) { // thiên thạch
-                    ctx.fillStyle = '#a06a6a';
-                    ctx.beginPath();
-                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
-                    ctx.fill();
-                    ctx.fillStyle = '#6a4a4a';
-                    ctx.beginPath();
-                    ctx.arc(obs.x + 15, obs.y + 12, 8, 0, 2*Math.PI);
-                    ctx.fill();
-                } else if (obs.type === 1) { // băng
-                    ctx.fillStyle = '#b0e0ff';
-                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                } else if (obs.type === 2) { // ufo
-                    ctx.fillStyle = '#b08a8a';
-                    ctx.beginPath();
-                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
-                    ctx.fill();
-                    ctx.fillStyle = '#f0d68a';
-                    ctx.beginPath();
-                    ctx.arc(obs.x + obs.width/2 - 6, obs.y + obs.height/2 - 8, 7, 0, 2*Math.PI);
-                    ctx.fill();
-                } else { // lỗ đen
-                    ctx.fillStyle = '#2a1f2a';
-                    ctx.beginPath();
-                    ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, 2*Math.PI);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
-
-            // ========== SINH VẬT CẢN ==========
-            function spawnObstacle() {
-                if (!gameActive) return;
-                const type = Math.floor(Math.random() * 4);
-                let w = 55 + Math.random()*20, h = 28 + Math.random()*18;
-                obstacles.push({
-                    x: W,
-                    y: GROUND_Y - h - 5,
-                    width: w, height: h,
-                    type,
-                    passed: false
-                });
-            }
-
-            function rectCollide(x1,y1,w1,h1,x2,y2,w2,h2) {
-                return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
-            }
-
-            // ========== CẬP NHẬT GAME ==========
-            function updateGame() {
-                if (!gameActive) return;
-
-                // Trọng lực
-                player.vy += GRAVITY;
-                player.y += player.vy;
-
-                if (player.y >= GROUND_Y - PLAYER_HEIGHT) {
-                    player.y = GROUND_Y - PLAYER_HEIGHT;
-                    player.vy = 0;
-                    player.grounded = true;
-                    player.scale = 1.0;
-                } else {
-                    player.grounded = false;
-                    player.scale = (player.vy < 0) ? 1.08 : 0.95;
-                }
-
-                // Nhảy
-                if (jumpPressed && player.grounded && canJump) {
-                    player.vy = JUMP_POWER;
-                    player.grounded = false;
-                    canJump = false;
-                    addJumpParticles(player.x + PLAYER_WIDTH/2, player.y + PLAYER_HEIGHT-10);
-                }
-                if (!jumpPressed) canJump = true;
-
-                // Di chuyển obstacles
-                for (let i = obstacles.length-1; i>=0; i--) {
-                    let o = obstacles[i];
-                    o.x -= OBSTACLE_SPEED;
-
-                    if (!o.passed && o.x + o.width < PLAYER_X) {
-                        o.passed = true;
-                        score++;
-                        scoreSpan.innerText = score;
-                        if (score >= 9) {
-                            gameActive = false;
-                            startQuiz();
-                            return;
-                        }
-                    }
-
-                    if (o.x + o.width < 0) obstacles.splice(i,1);
-                }
-
-                // Va chạm
-                for (let o of obstacles) {
-                    if (rectCollide(player.x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT, o.x, o.y, o.width, o.height)) {
-                        gameActive = false;
-                        alert('💥 Rùa lạc vào vũ trụ! Thử lại nhé.');
-                        resetGame();
-                        return;
-                    }
-                }
-
-                // Sinh vật cản
-                frameCounter++;
-                if (frameCounter % SPAWN_RATE === 0 && (obstacles.length === 0 || obstacles[obstacles.length-1].x < W - MIN_OBS_DIST)) {
-                    spawnObstacle();
-                }
-
-                // Cập nhật hạt
-                for (let i=particles.length-1; i>=0; i--) {
-                    particles[i].update();
-                    if (particles[i].alpha <= 0) particles.splice(i,1);
-                }
-            }
-
-            // ========== VẼ ==========
-            function draw() {
-                drawBackground();
-                obstacles.forEach(o => drawObstacle(o));
-                drawTurtle(player.x, player.y, player.scale);
-                particles.forEach(p => p.draw());
-
-                ctx.font = 'bold 30px "Poppins", sans-serif';
-                ctx.fillStyle = '#ffe6f0';
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = '#ff99cc';
-                ctx.fillText(`✨ ${score}/9`, 680, 70);
-                ctx.shadowBlur = 0;
-            }
-
-            function gameLoop() {
-                if (gameActive) updateGame();
-                draw();
-                requestAnimationFrame(gameLoop);
-            }
-
-            // ========== RESET GAME ==========
-            function resetGame() {
-                gameActive = true;   // sau khi start, game active
-                score = 0;
-                scoreSpan.innerText = '0';
-                player.y = GROUND_Y - PLAYER_HEIGHT;
-                player.vy = 0;
-                obstacles = [];
-                frameCounter = 0;
-                particles = [];
-                gameArea.classList.remove('hidden');
-                quizArea.classList.add('hidden');
-                // Không dừng nhạc khi reset
-            }
-
-            // ========== BẮT ĐẦU GAME ==========
-            startBtn.addEventListener('click', () => {
-                startOverlay.classList.add('hidden');
-                resetGame();  // gameActive = true
-                // Có thể bật nhạc nền nhẹ nếu muốn
-            });
-
-            // ========== QUIZ ==========
-            function startQuiz() {
-                gameArea.classList.add('hidden');
-                quizArea.classList.remove('hidden');
-                currentQuestion = 0;
-                showQuestion(0);
-                nextBtn.classList.add('hidden');
-                quizFeedback.classList.add('hidden');
-                valentineCard.classList.add('hidden');
-            }
-
-            const questions = [
-                {
-                    q: "anh pin thích?",
-                    options: [
-                        { text: "apin thích em", feedback: "tuyệt vời lắm bảo bối à, em là số 1 của lòng anh" },
-                        { text: "apin thích lego", feedback: "apin thích lego nhưng cục cưng của a là em đó bảo bối nhỏ" }
-                    ]
-                },
-                {
-                    q: "apin vễ xương hong?",
-                    options: [
-                        { text: "vễ xưn", feedback: "e tuyệt vời lắm, a biết a e xun như e mò" },
-                        { text: "siu vễ xưn", feedback: "đúng vậy, 2 chúng ta là 1, siu cấp vễ xun" }
-                    ]
-                },
-                {
-                    q: "apin yêu e nhỏ nhiều hăm?",
-                    options: [
-                        { text: "hăm", feedback: "LỖI! Không được chọn 'hăm', hãy chọn 'siu siu siu nhiều'", error: true },
-                        { text: "siu siu siu nhiều", feedback: "" }
-                    ]
-                }
-            ];
-
-            let currentQuestion = 0;
-
-            function showQuestion(index) {
-                if (index >= questions.length) {
-                    quizQuestion.classList.add('hidden');
-                    quizOptions.classList.add('hidden');
-                    quizFeedback.classList.add('hidden');
-                    nextBtn.classList.add('hidden');
-                    valentineCard.classList.remove('hidden');
-                    valentineCard.innerHTML = `e nhỏ vễ xun, valentine này a ở xa mất rùi nên không cho e nhỏ nhiều được, nma a vẫn yêu em nhiều, chúc e nhỏ của apin ngày càng vễ xun, yêu em, anh yêu em nhiều ~~~ Moaaaaaaaaa~~~ Loveee 💖`;
-
-                    // Tự động bật nhạc
-                    bgMusic.play().then(() => {
-                        bgMusic.loop = true;
-                        musicPlaying = true;
-                        musicToggleBtn.innerHTML = '🔊 Nhạc';
-                    }).catch(e => {});
-                    return;
-                }
-
-                const q = questions[index];
-                quizQuestion.innerText = q.q;
-                quizQuestion.classList.remove('hidden');
-                quizOptions.classList.remove('hidden');
-                quizFeedback.classList.add('hidden');
-                nextBtn.classList.add('hidden');
-                valentineCard.classList.add('hidden');
-
-                quizOptions.innerHTML = '';
-                q.options.forEach((opt, i) => {
-                    const btn = document.createElement('div');
-                    btn.className = 'quiz-option';
-                    btn.innerText = opt.text;
-                    btn.addEventListener('click', () => handleAnswer(index, i));
-                    quizOptions.appendChild(btn);
-                });
-            }
-
-            function handleAnswer(qIndex, optIndex) {
-                const q = questions[qIndex];
-                const opt = q.options[optIndex];
-
-                quizFeedback.innerText = opt.feedback || '❤️ Yêu thương...';
-                quizFeedback.classList.remove('hidden');
-
-                if (qIndex === 2 && optIndex === 0) {
-                    nextBtn.classList.add('hidden');
-                    return;
-                }
-
-                nextBtn.classList.remove('hidden');
-            }
-
-            nextBtn.addEventListener('click', () => {
-                currentQuestion++;
-                showQuestion(currentQuestion);
-            });
-
-            // ========== ĐIỀU KHIỂN ==========
-            window.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') { e.preventDefault(); jumpPressed = true; }
-            });
-            window.addEventListener('keyup', (e) => {
-                if (e.code === 'Space') { e.preventDefault(); jumpPressed = false; }
-            });
-            canvas.addEventListener('click', () => {
-                jumpPressed = true;
-                setTimeout(() => jumpPressed = false, 100);
-            });
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                jumpPressed = true;
-                setTimeout(() => jumpPressed = false, 100);
-            });
-
-            restartBtn.addEventListener('click', () => {
-                if (gameActive) resetGame();
-                else {
-                    // Nếu game chưa active (hiếm), vẫn reset được
-                    resetGame();
-                }
-            });
-
-            gameLoop();
-        })();
-    </script>
 </body>
 </html>
